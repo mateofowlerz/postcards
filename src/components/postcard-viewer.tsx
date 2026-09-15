@@ -6,7 +6,7 @@ import { useCallback, useLayoutEffect, useRef } from "react";
 export function PostcardFront() {
   return <Image src="/images/bogliasco-front.jpg" width={1551} height={984}
     alt="Bogliasco on the Italian Riviera, vintage postcard from 1900."
-    sizes="(max-width: 599px) 46vw, (max-width: 999px) 30vw, (max-width: 1599px) 23vw, 18vw"
+    sizes="(max-width: 599px) 23vw, (max-width: 999px) 15vw, (max-width: 1599px) 12vw, 10vw"
     className="grid-postcard-front" />;
 }
 

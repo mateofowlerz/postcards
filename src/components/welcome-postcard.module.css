@@ -1,0 +1,154 @@
+.welcome {
+  container-type: inline-size;
+  width: 50%;
+  margin-inline: auto;
+}
+
+.photo {
+  aspect-ratio: 516 / 331;
+  overflow: hidden;
+}
+
+.photoImage {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.back {
+  position: relative;
+  aspect-ratio: 516 / 324;
+  overflow: hidden;
+  color: #515885;
+  font-family: var(--postcard-print), monospace;
+  isolation: isolate;
+  background: #ece2da;
+  -webkit-font-smoothing: antialiased;
+  text-shadow: .012cqw .012cqw .025cqw rgb(70 74 119 / .4);
+}
+
+/* Two blank paper-only areas of the scan. None of the printed lettering is
+   included: every blue mark below is selectable HTML text or a CSS border. */
+.back::before, .back::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  width: 50%;
+  z-index: -2;
+  pointer-events: none;
+  background-image: url("/images/split-rock-postcard.png");
+  background-repeat: no-repeat;
+}
+.back::before {
+  left: 0;
+  background-size: 245.7143% 262%;
+  background-position: 5.2288% 91.9753%;
+}
+.back::after {
+  right: 0;
+  background-size: 224.3478% 396.9697%;
+  background-position: 92.6573% 96.9388%;
+}
+
+/* Preserve the paper's actual wear while masking every original printed area.
+   The paper-only samples underneath fill those cutouts; no raster labels show. */
+.paper {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url("/images/split-rock-postcard.png") center bottom / 100% 202.160494% no-repeat;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 516 324' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cfilter id='soft'%3E%3CfeGaussianBlur stdDeviation='1.4'/%3E%3C/filter%3E%3Cmask id='paper'%3E%3Crect width='516' height='324' fill='white'/%3E%3Cg fill='black' filter='url(%23soft)'%3E%3Crect x='14' y='15' width='224' height='25'/%3E%3Crect x='242' y='9' width='18' height='309'/%3E%3Crect x='434' y='12' width='70' height='76'/%3E%3Crect x='316' y='92' width='143' height='29'/%3E%3Crect x='357' y='120' width='47' height='18'/%3E%3Crect x='13' y='306' width='222' height='18'/%3E%3C/g%3E%3C/mask%3E%3C/defs%3E%3Crect width='516' height='324' fill='white' mask='url(%23paper)'/%3E%3C/svg%3E");
+  mask-size: 100% 100%;
+}
+
+.back p, .back h2 { margin: 0; }
+
+.caption {
+  position: absolute;
+  left: 3.49%;
+  top: 5.86%;
+  font-size: 1.36cqw;
+  line-height: 1.17;
+  letter-spacing: .07cqw;
+  text-shadow: .025cqw 0 .025cqw currentColor;
+  transform: scaleX(1.12);
+  transform-origin: left top;
+}
+
+.publisher {
+  position: absolute;
+  left: 48.8%;
+  bottom: 4.32%;
+  width: 56.2%;
+  transform: rotate(-90deg);
+  transform-origin: left bottom;
+  white-space: nowrap;
+  font-family: var(--postcard-script), cursive;
+  font-size: 1.235cqw;
+  line-height: 1;
+  letter-spacing: -.025cqw;
+}
+
+.publisher strong {
+  font-family: var(--postcard-print), monospace;
+  font-size: 1.43cqw;
+  font-weight: 400;
+}
+
+.stamp {
+  position: absolute;
+  left: 85.08%;
+  top: 5.56%;
+  width: 11.43%;
+  height: 20.37%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.13cqw;
+  border: .34cqw solid rgb(75 82 122 / .86);
+  box-shadow: .08cqw .02cqw .15cqw rgb(75 82 122 / .18), inset .04cqw .01cqw .12cqw rgb(75 82 122 / .15);
+  font-size: 1.29cqw;
+  line-height: 1.12;
+  letter-spacing: .08cqw;
+  text-align: center;
+  text-shadow: .03cqw 0 .02cqw currentColor;
+}
+
+.title {
+  position: absolute;
+  left: 62.2%;
+  top: 30.25%;
+  font-family: var(--postcard-heading), Georgia, serif;
+  font-size: 4.46cqw;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.085cqw;
+  white-space: nowrap;
+  transform: scaleX(.86);
+  transform-origin: left center;
+}
+
+.address {
+  position: absolute;
+  top: 39.2%;
+  left: 71%;
+  font-family: var(--postcard-script), cursive;
+  font-size: 1.4cqw;
+  line-height: 1;
+}
+
+.footer, .edition {
+  position: absolute;
+  bottom: 2.16%;
+  font-size: 1.02cqw;
+  line-height: 1;
+  letter-spacing: .055cqw;
+}
+.footer { left: 3.49%; letter-spacing: .105cqw; transform: scaleX(1.3); transform-origin: left bottom; }
+.edition { left: 40.9%; }
+
+@media (max-width: 1024px) {
+  .welcome { width: 100%; }
+}

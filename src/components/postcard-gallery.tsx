@@ -3,7 +3,7 @@
 import { PostcardFront, PostcardViewer } from "./postcard-viewer";
 import { useCallback, useEffect, useRef, useState } from "react";
 import useSWRInfinite from "swr/infinite";
-import { MAX_QUERY_LENGTH, normalizeQuery, type PostcardPage } from "@/lib/postcards";
+import { type PostcardPage } from "@/lib/postcards";
 
 async function fetchPage(url: string): Promise<PostcardPage> {
   const response = await fetch(url);
@@ -12,50 +12,7 @@ async function fetchPage(url: string): Promise<PostcardPage> {
 }
 
 export function PostcardGallery({ initialQuery, initialPage }: { initialQuery: string; initialPage: PostcardPage }) {
-  const [draft, setDraft] = useState(initialQuery);
-  const [query, setQuery] = useState(initialQuery);
-
-  const search = useCallback((value: string) => {
-    const next = normalizeQuery(value);
-    setQuery(next);
-    const url = new URL(window.location.href);
-    if (next) url.searchParams.set("q", next);
-    else url.searchParams.delete("q");
-    window.history.replaceState(null, "", url);
-  }, []);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => search(draft), 250);
-    return () => window.clearTimeout(timer);
-  }, [draft, search]);
-
-  useEffect(() => {
-    function restoreSearch() {
-      const value = normalizeQuery(new URLSearchParams(window.location.search).get("q") ?? "");
-      setDraft(value);
-      setQuery(value);
-    }
-    window.addEventListener("popstate", restoreSearch);
-    return () => window.removeEventListener("popstate", restoreSearch);
-  }, []);
-
-  return (
-    <>
-      <header className="gallery-header">
-        <h1>Postcards</h1>
-        <form role="search" onSubmit={(event) => { event.preventDefault(); search(draft); }}>
-          <label className="search-field">
-            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 4.5 4.5" />
-            </svg>
-            <span className="sr-only">Search by place</span>
-            <input type="search" name="q" placeholder="Search by place" autoComplete="off" maxLength={MAX_QUERY_LENGTH} value={draft} onChange={(event) => setDraft(event.target.value)} />
-          </label>
-        </form>
-      </header>
-      <GalleryResults key={query} query={query} initialPage={query === initialQuery ? initialPage : undefined} />
-    </>
-  );
+  return <GalleryResults key={initialQuery} query={initialQuery} initialPage={initialPage} />;
 }
 
 function GalleryResults({ query, initialPage }: { query: string; initialPage?: PostcardPage }) {
