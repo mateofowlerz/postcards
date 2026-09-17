@@ -3,7 +3,7 @@
 import { PostcardFront, PostcardViewer } from "./postcard-viewer";
 import { useCallback, useEffect, useRef, useState } from "react";
 import useSWRInfinite from "swr/infinite";
-import { type PostcardPage } from "@/lib/postcards";
+import { isPortrait, type PostcardPage } from "@/lib/postcards";
 
 async function fetchPage(url: string): Promise<PostcardPage> {
   const response = await fetch(url);
@@ -27,7 +27,7 @@ function GalleryResults({ query, initialPage }: { query: string; initialPage?: P
       return `/api/postcards?${params}`;
     },
     fetchPage,
-    { fallbackData: initialPage ? [initialPage] : undefined, revalidateFirstPage: false, revalidateOnFocus: false, shouldRetryOnError: false },
+    { fallbackData: initialPage ? [initialPage] : undefined, revalidateFirstPage: true, revalidateOnFocus: true, shouldRetryOnError: false },
   );
   const cards = data?.flatMap((page) => page.items) ?? [];
   const hasMore = data ? data.at(-1)!.nextCursor !== null : false;
@@ -52,23 +52,29 @@ function GalleryResults({ query, initialPage }: { query: string; initialPage?: P
   return (
     <section aria-label="Postcard collection" aria-busy={loading && !error}>
       <ul className="postcard-grid">
-        {cards.map((card) => (
-          <li className="postcard-tile" key={card.id} data-postcard-id={card.id}>
-            <button type="button" className="postcard-open" style={{ visibility: selected?.id === card.id ? "hidden" : undefined }} aria-label="Turn over the Bogliasco postcard" aria-haspopup="dialog" onClick={event => setSelected({ trigger: event.currentTarget, id: card.id })}>
-              <PostcardFront />
+        {cards.map((card, index) => (
+          <li className={`postcard-tile ${index > 0 && isPortrait(card) && !isPortrait(cards[index - 1]) ? "postcard-orientation-start" : ""}`} key={card.id} data-postcard-id={card.id}>
+            <button type="button" className="postcard-open" style={{ visibility: selected?.id === card.id ? "hidden" : undefined }} aria-label={`Write a postcard: ${card.title}`} aria-haspopup="dialog" onClick={event => setSelected({ trigger: event.currentTarget, id: card.id })}>
+              <PostcardFront card={card} />
             </button>
           </li>
         ))}
       </ul>
       <div className="gallery-status" ref={sentinel}>
         <p role="status" aria-live="polite">
-          {error ? "Couldn’t load postcards." : !data ? "Finding postcards…" : cards.length === 0 ? `No postcards found for “${query}”.` : `${cards.length} of ${data[0].total} postcards`}
+          {error ? "Couldn’t load postcards." : !data ? "Finding postcards…" : cards.length === 0 ? `No postcards found for “${query}”.` : ""}
         </p>
         {error ? <button type="button" onClick={() => void mutate()}>Try again</button> : hasMore ? (
           <button type="button" onClick={() => void loadMore()} disabled={loading}>{loading ? "Loading…" : "Load more"}</button>
         ) : null}
       </div>
-      {selected ? <PostcardViewer trigger={selected.trigger} onClose={closePostcard} /> : null}
+      {selected ? <PostcardViewer card={cards.find(card => card.id === selected.id)!} trigger={selected.trigger} onClose={closePostcard} /> : null}
     </section>
   );
 }
+
+
+
+
+
+

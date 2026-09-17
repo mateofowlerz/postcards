@@ -1,10 +1,11 @@
 import "server-only";
+import { getHiddenPostcardIds } from './postcard-curation';
 import { neon } from "@neondatabase/serverless";
 import { getSamplePage, normalizeQuery, PAGE_SIZE, type Postcard, type PostcardPage } from "./postcards";
 
 export async function getPostcards(query = "", cursor = 0): Promise<PostcardPage> {
   if (process.env.POSTCARDS_DATA_SOURCE !== "postgres") {
-    return getSamplePage(query, cursor);
+    return getSamplePage(query, cursor, await getHiddenPostcardIds());
   }
   if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is required for the Postgres data source.");

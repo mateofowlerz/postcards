@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { WelcomePhoto } from './welcome-photo';
 import { Delius, Josefin_Slab, Petit_Formal_Script } from "next/font/google";
 import styles from "./welcome-postcard.module.css";
 
@@ -10,23 +11,25 @@ export function WelcomePostcard() {
   return (
     <section className={`${styles.welcome} ${print.variable} ${heading.variable} ${script.variable}`} aria-label="Welcome postcard">
       <div className={styles.photo}>
+        <WelcomePhoto>
         <Image src="/images/split-rock-postcard.png" width={2064} height={2620}
           alt="Visitors atop Split Rock at Lake Harmony in Pennsylvania's Pocono Mountains."
           className={styles.photoImage} sizes="(max-width: 1024px) 100vw, 50vw" preload />
+        </WelcomePhoto>
       </div>
       <div className={styles.back}>
         <div className={styles.paper} aria-hidden="true" />
         <p className={styles.caption}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing.<br />
-          Sed do eiusmod tempor incididunt ut labore et dolore.
+          A digital archive of vintage postcards —<br />
+          browse, write, and send one.
         </p>
         <p className={styles.publisher}>
           <strong>Lorem</strong>{" "}ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.
         </p>
-        <div className={styles.stamp} aria-label="Lorem ipsum dolor">
-          <span>LOREM</span><span>IPSUM<br />DOLOR</span>
+        <div className={styles.stamp} aria-label="Place stamp here">
+          <span>PLACE</span><span>STAMP<br />HERE</span>
         </div>
-        <h2 className={styles.title}>LOREM IPSUM</h2>
+        <h2 className={styles.title}>POST CARD</h2>
         <p className={styles.address}>Lorem</p>
         <p className={styles.footer}>Lorem ipsum dolor sit amet, consectetur.</p>
         <p className={styles.edition}>IPSUM</p>
@@ -34,3 +37,4 @@ export function WelcomePostcard() {
     </section>
   );
 }
+
