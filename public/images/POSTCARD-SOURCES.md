@@ -29,3 +29,5 @@ Imported all 93 image blocks from https://www.are.na/natalie-patane/stamped-ecev
 ## User submissions
 
 Added the supplied black-and-white modernist house photograph as a postcard on 2026-09-23. It uses the shared writable postcard-back template.
+
+Added three more supplied images on 2026-09-23: “Wish You Were Here — Subway Map,” “Morning Glory,” and “Palm Trees and House.” Each uses the shared writable postcard-back template.

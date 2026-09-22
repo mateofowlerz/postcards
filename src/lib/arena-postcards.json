@@ -1333,5 +1333,29 @@
     "imageUrl": "/images/user-submissions/modernist-house.png",
     "width": 600,
     "height": 338
+  },
+  {
+    "id": 90000010,
+    "title": "Wish You Were Here — Subway Map",
+    "place": "New York City, New York",
+    "imageUrl": "/images/user-submissions/wish-you-were-here-subway-map.png",
+    "width": 1199,
+    "height": 848
+  },
+  {
+    "id": 90000011,
+    "title": "Morning Glory",
+    "place": "London, England",
+    "imageUrl": "/images/user-submissions/morning-glory.png",
+    "width": 736,
+    "height": 515
+  },
+  {
+    "id": 90000012,
+    "title": "Palm Trees and House",
+    "place": "",
+    "imageUrl": "/images/user-submissions/palm-trees-and-house.png",
+    "width": 749,
+    "height": 610
   }
 ]
