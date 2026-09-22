@@ -63,6 +63,16 @@ npm run test:http     # requires npm run dev; 60 concurrent requests plus edge c
 
 Set `POSTCARDS_TEST_ORIGIN` to test a different app origin; its database must match `.env.local` for snapshot verification and test cleanup.
 
+## Social previews
+
+The homepage and legacy `/postcard` links have a default vintage postcard preview. Short links use the selected postcard's artwork. Open Graph and Twitter metadata use absolute `https://postcards.page` URLs; handwritten messages and recipient addresses are excluded from preview metadata. `/api/og?card=ID&v=1` renders a cached 1200 × 630 PNG, preserves the artwork's proportions and crop, and loads its public source image from the production site.
+
+The HTTP suite checks metadata in the document head for Facebook, Twitter, WhatsApp, and Slack crawlers, plus image content types, PNG dimensions, size, distinct artwork, and invalid IDs. Run just these checks with:
+
+```sh
+node --env-file-if-exists=.env.local --experimental-strip-types --test --test-name-pattern='social previews' tests/integration/sharing-http.test.mjs
+```
+
 ## Image
 
 `public/images/split-rock-postcard.png` is the supplied 516 × 655 postcard upscaled to 2064 × 2620 using Krea MCP and Topaz High Fidelity V2. The gallery uses responsive Next.js image optimization and lazy loading, with the first image preloaded. Hover scaling is restricted to precise pointing devices and disabled for reduced-motion preferences.

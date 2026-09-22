@@ -1,6 +1,13 @@
 import { preload } from 'react-dom';
 import patterns from '@/lib/patterns.json';
 import { SharedPostcardClient } from './shared-postcard-client';
+import { socialMetadata } from '@/lib/social-metadata';
+
+// Legacy URL fragments are unavailable to crawlers, so use the site preview.
+export const metadata = {
+  ...socialMetadata({ title: 'Somebody sent you a postcard', description: 'Open your postcard and read the note inside.', path: '/postcard' }),
+  robots: { index: false, follow: false },
+};
 
 export default async function SharedPostcardPage({ searchParams }: PageProps<'/postcard'>) {
   const params = await searchParams;

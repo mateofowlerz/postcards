@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
+import { SITE_URL, socialMetadata } from '@/lib/social-metadata';
 import "./globals.css";
 
 const poppins = Poppins({
@@ -10,8 +11,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Postcards — Split Rock",
-  description: "A vintage postcard from Split Rock, Lake Harmony, Pennsylvania.",
+  metadataBase: new URL(SITE_URL),
+  ...socialMetadata(),
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

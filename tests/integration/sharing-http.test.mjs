@@ -82,3 +82,50 @@ test('oversized bodies, unsupported methods and missing links return the expecte
   assert.equal((await fetch(`${origin}/api/share`)).status, 405);
   for (const slug of [`missing-${run}`, 'UPPERCASE', 'a'.repeat(65), 'trailing-']) assert.equal((await fetch(`${origin}/${slug}`)).status, 404);
 });
+
+test('social previews expose crawler-visible metadata and valid postcard-specific PNGs', async () => {
+  const pages = [{ path: '/', id: 1 }, { path: '/postcard', id: 1 }];
+  for (const id of [0, 1]) {
+    const response = await post({ ...payload, id });
+    assert.equal(response.status, 201);
+    const share = await response.json();
+    created.push(share.slug);
+    pages.push({ path: share.path, id });
+  }
+  for (const page of pages) {
+    for (const userAgent of ['facebookexternalhit/1.1', 'Twitterbot/1.0', 'WhatsApp/2.0', 'Slackbot-LinkExpanding 1.0']) {
+      const response = await fetch(origin + page.path, { headers: { 'User-Agent': userAgent } });
+      assert.equal(response.status, 200);
+      const head = (await response.text()).split('</head>')[0];
+      const tags = head.match(/<meta\b[^>]*>/g) ?? [];
+      const value = name => {
+        const matching = tags.filter(tag => tag.includes(`property="${name}"`) || tag.includes(`name="${name}"`));
+        assert.equal(matching.length, 1, `${page.path} ${userAgent}: ${name} must occur once in head`);
+        return matching[0].match(/content="([^"]*)"/)[1].replaceAll('&amp;', '&');
+      };
+      assert.equal(value('og:image'), `https://postcards.page/api/og?card=${page.id}&v=1`);
+      assert.equal(value('twitter:image'), value('og:image'));
+      assert.equal(new URL(value('og:url')).href, `https://postcards.page${page.path}`);
+      assert.equal(value('twitter:card'), 'summary_large_image');
+      assert.equal(value('og:image:width'), '1200');
+      assert.equal(value('og:image:height'), '630');
+      assert.ok(!value('og:description').includes(payload.message));
+      assert.ok(!value('og:description').includes(payload.address));
+    }
+  }
+  const images = [];
+  for (const id of [0, 1]) {
+    const response = await fetch(`${origin}/api/og?card=${id}&v=1`);
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get('content-type'), /^image\/png/);
+    const image = Buffer.from(await response.arrayBuffer());
+    assert.equal(image.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
+    assert.equal(image.readUInt32BE(16), 1200);
+    assert.equal(image.readUInt32BE(20), 630);
+    assert.ok(image.length < 5 * 1024 * 1024);
+    images.push(image);
+  }
+  assert.ok(!images[0].equals(images[1]), 'Different postcards must have different artwork');
+  for (const id of ['-1', 'bad', '1.5', '9007199254740992']) assert.equal((await fetch(`${origin}/api/og?card=${id}`)).status, 400);
+  assert.equal((await fetch(`${origin}/api/og?card=999999999`)).status, 404);
+});
