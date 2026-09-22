@@ -1,7 +1,16 @@
 import "server-only";
 import { getHiddenPostcardIds } from './postcard-curation';
-import { neon } from "@neondatabase/serverless";
-import { getSamplePage, normalizeQuery, PAGE_SIZE, type Postcard, type PostcardPage } from "./postcards";
+import { getDatabase } from './database';
+import { getSamplePage, normalizeQuery, PAGE_SIZE, samplePostcards, type Postcard, type PostcardPage } from "./postcards";
+
+export async function getPostcard(id: number): Promise<Postcard | null> {
+  if (id === 0) return { id: 0, title: 'Split Rock', place: 'Lake Harmony, Pennsylvania', imageUrl: '/images/split-rock-postcard.png', width: 2064, height: 2620 };
+  if (process.env.POSTCARDS_DATA_SOURCE !== 'postgres') return samplePostcards.find(card => card.id === id) ?? null;
+  if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required for the Postgres data source.');
+  const sql = getDatabase();
+  const rows = await sql`SELECT id, title, place, image_url AS "imageUrl", width, height FROM postcards WHERE id = ${id}`;
+  return (rows[0] as Postcard | undefined) ?? null;
+}
 
 export async function getPostcards(query = "", cursor = 0): Promise<PostcardPage> {
   if (process.env.POSTCARDS_DATA_SOURCE !== "postgres") {
@@ -11,7 +20,7 @@ export async function getPostcards(query = "", cursor = 0): Promise<PostcardPage
     throw new Error("DATABASE_URL is required for the Postgres data source.");
   }
 
-  const sql = neon(process.env.DATABASE_URL);
+  const sql = getDatabase();
   const terms = normalizeQuery(query).toLowerCase().split(" ").filter(Boolean);
   // Literal substring search: %, _ and quotes are never SQL wildcards or syntax.
   const result = await sql`
@@ -19,7 +28,7 @@ export async function getPostcards(query = "", cursor = 0): Promise<PostcardPage
       SELECT id, title, place, image_url AS "imageUrl", width, height
       FROM postcards
       WHERE NOT EXISTS (
-        SELECT 1 FROM unnest(${terms}::text[]) AS term
+        SELECT 1 FROM unnest(${sql.array(terms)}::text[]) AS term
         WHERE strpos(lower(title || ' ' || place), term) = 0
       )
     ), page AS (

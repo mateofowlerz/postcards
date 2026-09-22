@@ -5,13 +5,18 @@ import { useEffect, useRef, useState } from 'react';
 import { PostcardViewer, type PostcardDraft } from '@/components/postcard-viewer';
 import { samplePostcards, type Postcard } from '@/lib/postcards';
 
-export function SharedPostcardClient() {
-  const [received, setReceived] = useState<{ card: Postcard; draft: PostcardDraft } | null>(null);
+type ReceivedPostcard = { card: Postcard; draft: PostcardDraft };
+
+export function SharedPostcardClient({ initialReceived }: { initialReceived?: ReceivedPostcard }) {
+  const [received, setReceived] = useState<ReceivedPostcard | null>(initialReceived ?? null);
   const [error, setError] = useState('');
   const [mailboxOpening, setMailboxOpening] = useState(false);
   const [mailboxOpen, setMailboxOpen] = useState(false);
   const mailboxTimer = useRef<number | null>(null);
   useEffect(() => {
+    if (initialReceived) return () => {
+      if (mailboxTimer.current !== null) window.clearTimeout(mailboxTimer.current);
+    };
     function loadPostcard() {
       if (mailboxTimer.current !== null) window.clearTimeout(mailboxTimer.current);
       setMailboxOpening(false);
@@ -35,7 +40,7 @@ export function SharedPostcardClient() {
       window.removeEventListener('hashchange', loadPostcard);
       if (mailboxTimer.current !== null) window.clearTimeout(mailboxTimer.current);
     };
-  }, []);
+  }, [initialReceived]);
   function openMailbox() {
     if (mailboxOpening) return;
     setMailboxOpening(true);

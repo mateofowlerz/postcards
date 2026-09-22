@@ -5,7 +5,10 @@ import { stamps } from "@/lib/stamps";
 import patterns from '@/lib/patterns.json';
 import patternMatches from '@/lib/pattern-matches.json';
 import type { Postcard } from "@/lib/postcards";
+import type { PlacedStamp, PostcardDraft } from '@/lib/shared-postcard';
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+
+export type { PostcardDraft } from '@/lib/shared-postcard';
 
 export function PostcardFront({ card }: { card: Postcard }) {
   const [left, top, right, bottom] = card.crop ?? [0, 0, 0, 0];
@@ -17,8 +20,6 @@ export function PostcardFront({ card }: { card: Postcard }) {
       style={{ position: 'absolute', maxWidth: 'none', width: `${card.width / width * 100}%`, left: `${-left / width * 100}%`, top: `${-top / height * 100}%` }} />
   </div>;
 }
-type PlacedStamp = { id: string; x: number; y: number };
-export type PostcardDraft = { message: string; address: string; stampId: string; stamps?: PlacedStamp[]; patternIndex?: number };
 export function PostcardViewer({ card, trigger, onClose, receivedDraft }: { card: Postcard; trigger?: HTMLButtonElement; onClose: () => void; receivedDraft?: PostcardDraft }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const messageField = useRef<HTMLTextAreaElement>(null);
@@ -34,24 +35,41 @@ export function PostcardViewer({ card, trigger, onClose, receivedDraft }: { card
   const [selectedStampIndex, setSelectedStampIndex] = useState<number | null>(null);
   const [shareLink, setShareLink] = useState('');
   const [shareStatus, setShareStatus] = useState('');
+  const [sharing, setSharing] = useState(false);
+  const sharingRef = useRef(false);
   const [showBack, setShowBack] = useState(false);
   const [mailing, setMailing] = useState(false);
   async function createLink() {
+    if (sharingRef.current) return;
+    sharingRef.current = true;
+    setSharing(true);
+    setShareLink('');
+    setShareStatus('saving your postcard…');
     const matches = (patternMatches as Record<string, number[]>)[String(card.id)] ?? patterns.map((_, index) => index);
     const patternIndex = matches[Math.floor(Math.random() * matches.length)];
     const payload = { id: card.id, message, address, stampId, stamps: placedStamps, patternIndex };
-    const encoded = btoa(Array.from(new TextEncoder().encode(JSON.stringify(payload)), byte => String.fromCharCode(byte)).join('')).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    const configuredOrigin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '');
-    const origin = configuredOrigin || window.location.origin;
-    const link = `${origin}/postcard?p=${patternIndex}#${encoded}`;
-    setShareLink(link);
-    setMailing(true);
-    if (!configuredOrigin && ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname)) {
-      setShareStatus('local preview link — publish the site before sending it.');
-      return;
+    try {
+      const response = await fetch('/api/share', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error('Sharing failed');
+      const { path } = await response.json();
+      // Use the origin that saved the postcard, including local and preview environments.
+      const link = new URL(path, window.location.origin).href;
+      setShareLink(link);
+      setMailing(true);
+      if (['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname)) {
+        setShareStatus('local preview link — publish the site before sending it.');
+        return;
+      }
+      try { await navigator.clipboard.writeText(link); setShareStatus('link copied.'); }
+      catch { setShareStatus('copy the link below.'); }
+    } catch {
+      setShareStatus('your link could not be saved. please try again.');
+    } finally {
+      sharingRef.current = false;
+      setSharing(false);
     }
-    try { await navigator.clipboard.writeText(link); setShareStatus('link copied.'); }
-    catch { setShareStatus('copy the link below.'); }
   }
   const [stampPickerOpen, setStampPickerOpen] = useState(false);
   const storageKey = `postcard-draft-${card.id}`;
@@ -182,7 +200,7 @@ export function PostcardViewer({ card, trigger, onClose, receivedDraft }: { card
         </div>}
       </div>
       {!receivedDraft && <div className="postcard-share">
-        <button type="button" onClick={() => void createLink()}>create link</button>
+        <button type="button" disabled={sharing} onClick={() => void createLink()}>{sharing ? 'creating link…' : 'create link'}</button>
         {shareLink && <input aria-label="Postcard share link" readOnly value={shareLink} onFocus={event => event.currentTarget.select()} />}
         <p role="status">{shareStatus}</p>
       </div>}
@@ -194,8 +212,6 @@ export function PostcardViewer({ card, trigger, onClose, receivedDraft }: { card
     </div>
   </dialog>;
 }
-
-
 
 
 
