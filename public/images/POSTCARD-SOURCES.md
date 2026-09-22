@@ -25,3 +25,7 @@ Rechecked Noemi collection: 15 blocks; imported four new image blocks (44526526,
 Added all nine image blocks from Noemi Furno Marchese's https://www.are.na/noemi-furno-marchese/stamps-udmwukpuziy on 2026-09-16. Existing block IDs are deduplicated; original images and source URLs are preserved in the stamp collection.
 
 Imported all 93 image blocks from https://www.are.na/natalie-patane/stamped-ecev6zjljlu on 2026-09-15 for the stamp picker. Original image files are stored in stamps/; block titles and source URLs are preserved in src/lib/stamps.json. The channel's one nested-channel entry is excluded.
+
+## User submissions
+
+Added the supplied black-and-white modernist house photograph as a postcard on 2026-09-23. It uses the shared writable postcard-back template.
