@@ -54,6 +54,10 @@ Production never falls back to temporary files. If storage is unavailable, shari
 
 The migration enables row-level security and removes `anon`/`authenticated` table privileges, so Supabase's public Data API cannot list or modify postcards. The Next.js server accesses the table through its private database connection. Supabase's Free plan may pause after one week of inactivity.
 
+## Google Analytics
+
+Set `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID` to the Google Analytics 4 measurement ID (for example, `G-XXXXXXXXXX`) in the deployment environment. The Google tag loads after hydration on every route and remains disabled when the variable is unset.
+
 Additional verification (creates and removes only uniquely marked test postcards):
 
 ```sh
